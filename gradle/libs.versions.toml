@@ -20,7 +20,7 @@ androidx-test-runner = "1.6.2"
 
 detekt = "1.23.8"
 
-dokka = "2.0.0"
+dokka = "1.9.20"
 
 kotest = "5.9.1"
 
@@ -81,3 +81,6 @@ dokka-javadoc = { id = "org.jetbrains.dokka-javadoc", version.ref = "dokka" }
 kotlin-android = { id = "org.jetbrains.kotlin.android", version.ref = "kotlin" }
 
 maven-publish = { id = "com.vanniktech.maven.publish", version.ref = "maven-publish" }
+
+dokka-javadoc-plugin = { id = "org.jetbrains.dokka.javadoc-plugin", version.ref = "dokka" }
+
