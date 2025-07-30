@@ -64,12 +64,16 @@ android {
             }
         }
     }
+
+    publishing {
+        singleVariant("release") {}
+    }
 }
 
 kotlin {
     compilerOptions {
         javaParameters = true
-        jvmTarget = JvmTarget.JVM_17
+        jvmTarget = JvmTarget.JVM_1_8
     }
 }
 
