@@ -1,0 +1,90 @@
+apply plugin: 'maven-publish'
+apply plugin: 'signing'
+apply plugin: 'org.jetbrains.dokka'
+
+task androidSourcesJar(type: Jar) {
+    archiveClassifier.set('sources')
+    if (project.plugins.findPlugin("com.android.library")) {
+        from android.sourceSets.main.java.srcDirs
+        from android.sourceSets.main.kotlin.srcDirs
+    } else {
+        from sourceSets.main.java.srcDirs
+        from sourceSets.main.kotlin.srcDirs
+    }
+}
+
+tasks.withType(dokkaHtmlPartial.getClass()).configureEach {
+    pluginsMapConfiguration.set(
+            ["org.jetbrains.dokka.base.DokkaBase": """{ "separateInheritedMembers": true}"""]
+    )
+}
+
+task javadocJar(type: Jar, dependsOn: dokkaJavadoc) {
+    archiveClassifier.set('javadoc')
+    from dokkaJavadoc.outputDirectory
+}
+
+artifacts {
+    archives androidSourcesJar
+    archives javadocJar
+}
+
+group = project.findProperty("PUBLISH_GROUP_ID") as String
+version = project.findProperty("PUBLISH_VERSION") as String
+
+afterEvaluate {
+    publishing {
+        publications {
+            release(MavenPublication) {
+                groupId group
+                artifactId PUBLISH_ARTIFACT_ID
+                version PUBLISH_VERSION
+                if (project.plugins.findPlugin("com.android.library")) {
+                    from components.release
+                } else {
+                    from components.java
+                }
+
+//                artifact androidSourcesJar
+                artifact javadocJar
+
+                pom {
+                    name = PUBLISH_ARTIFACT_ID
+                    description = 'Library for getting VideoSDK\'s participant streams statistics.'
+                    url = 'https://github.com/zujonow/libwebrtc-ktx'
+                    licenses {
+                        license {
+                            name = 'VideoSDK License'
+                            url = 'https://github.com/zujonow/libwebrtc-ktx/blob/main/LICENSE'
+                        }
+                    }
+                    developers {
+                        developer {
+                            id = 'videosdk'
+                            name = 'VideoSDK'
+                            email = 'admin@videosdk.live'
+                        }
+                    }
+                    scm {
+                        connection = 'scm:git://github.com/zujonow/libwebrtc-ktx.git'
+                        developerConnection = 'scm:git://github.com/zujonow/libwebrtc-ktx.git'
+                        url = 'https://github.com/zujonow/libwebrtc-ktx'
+                    }
+                }
+            }
+        }
+    }
+
+    tasks.matching { it.name == "generateMetadataFileForReleasePublication" }.configureEach {
+        dependsOn("androidSourcesJar", "javadocJar")
+    }
+}
+
+signing {
+    useInMemoryPgpKeys(
+            rootProject.ext["signing.keyId"],
+            rootProject.ext["signing.key"],
+            rootProject.ext["signing.password"],
+    )
+    sign publishing.publications
+}

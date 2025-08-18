@@ -1,19 +1,16 @@
-import com.vanniktech.maven.publish.AndroidSingleVariantLibrary
-import com.vanniktech.maven.publish.SonatypeHost
 import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 
 plugins {
     alias(libs.plugins.android.library)
     alias(libs.plugins.detekt)
     alias(libs.plugins.dokka)
-    alias(libs.plugins.dokka.javadoc)
+//    alias(libs.plugins.dokka.javadoc)
     alias(libs.plugins.kotlin.android)
-    alias(libs.plugins.maven.publish)
-    id("signing")
 }
 
-group = Maven.GROUP_ID
-version = Maven.VERSION
+apply("${rootProject.projectDir}/publish-module.gradle")
+
+
 
 android {
     namespace = "io.github.crow_misia.webrtc"
@@ -67,6 +64,10 @@ android {
             }
         }
     }
+
+    publishing {
+        singleVariant("release") {}
+    }
 }
 
 kotlin {
@@ -82,8 +83,8 @@ dependencies {
     compileOnly(platform(libs.kotlinx.coroutines.bom))
     compileOnly(libs.kotlinx.coroutines.core)
 
-    compileOnly(libs.libwebrtc.bin)
-
+//    compileOnly(libs.libwebrtc.bin)
+    compileOnly(files("libs/libwebrtc.aar"))
     testImplementation(libs.kotlinx.coroutines.test)
     testImplementation(libs.kotest.runner.junit5)
     testImplementation(libs.kotest.assertions.core)
@@ -98,48 +99,6 @@ dependencies {
     androidTestImplementation(libs.androidx.test.espresso.core)
     androidTestImplementation(libs.mockk.android)
     androidTestImplementation(libs.truth)
-}
-
-signing {
-    useGpgCmd()
-    sign(publishing.publications)
-}
-
-mavenPublishing {
-    configure(AndroidSingleVariantLibrary(
-        variant = "release",
-        publishJavadocJar = true,
-        sourcesJar = true,
-    ))
-
-    publishToMavenCentral(SonatypeHost.CENTRAL_PORTAL)
-
-    coordinates(Maven.GROUP_ID, Maven.ARTIFACT_ID, Maven.VERSION)
-
-    pom {
-        name = Maven.ARTIFACT_ID
-        description = Maven.DESCRIPTION
-        url = "https://github.com/${Maven.GITHUB_REPOSITORY}/"
-        licenses {
-            license {
-                name = Maven.LICENSE_NAME
-                url = Maven.LICENSE_URL
-                distribution = Maven.LICENSE_DIST
-            }
-        }
-        developers {
-            developer {
-                id = Maven.DEVELOPER_ID
-                name = Maven.DEVELOPER_NAME
-                email = Maven.DEVELOPER_EMAIL
-            }
-        }
-        scm {
-            url = "https://github.com/${Maven.GITHUB_REPOSITORY}/"
-            connection = "scm:git:git://github.com/${Maven.GITHUB_REPOSITORY}.git"
-            developerConnection = "scm:git:ssh://git@github.com/${Maven.GITHUB_REPOSITORY}.git"
-        }
-    }
 }
 
 detekt {
