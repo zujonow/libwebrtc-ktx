@@ -4,9 +4,9 @@
 
 android-gradle-plugin = "8.7.3"
 
-kotlin = "2.1.21"
+kotlin = "1.9.20"
 
-kotlinx-coroutines = "1.10.2"
+kotlinx-coroutines = "1.7.3"
 
 androidx-test-espresso = "3.6.1"
 
